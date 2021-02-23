@@ -1,0 +1,26 @@
+{
+    "name": "russianprotein/iikotransport",
+    "description": "iikoTransport API Library for PHP",
+    "type": "library",
+    "require": {
+        "guzzlehttp/guzzle": "^7.1@dev"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sergey Borguronov",
+            "email": "multiatlast@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "RussianProtein\\iikoTransport\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    }
+}
