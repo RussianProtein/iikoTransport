@@ -2,6 +2,7 @@
 namespace RussianProtein\iikoTransport;
 
 use GuzzleHttp\Client;
+use Log;
 
 class iikoTransport
 {
@@ -113,6 +114,7 @@ class iikoTransport
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
+
     }
 
     public function getTerminal($organizationIds)
@@ -123,7 +125,7 @@ class iikoTransport
 
             $client = new Client();
 
-            $body = ['organizationIds' => $organizationIds, 'includeDisabled' => true];
+            $body = ['organizationIds' => $organizationIds, 'includeDisabled' => false];
 
             $res = $client->request('POST', 'https://api-ru.iiko.services/api/1/terminal_groups', [
                 'body' => json_encode($body),
@@ -154,7 +156,7 @@ class iikoTransport
 
 
 
-    public function createOrder($organizationId, $orderIds)
+    public function createOrder($organizationId, $terminal, $orderIds)
     {
         $token = $this->getToken();
 
@@ -163,9 +165,11 @@ class iikoTransport
             $client = new Client();
 
             $body = ['organizationId' => $organizationId,
-            // 'terminalGroupId' => 'c880392b-0fe7-4006-a328-3b4a8843fbab',
-            'createOrderSettings' => ['transportToFrontTimeout' => 300, 'creationStatus' => 'Success'], 'order' => $orderIds];
-            // dd(json_encode($body));
+            'terminalGroupId' => $terminal,
+            'createOrderSettings' => ['transportToFrontTimeout' => 300, "mode" => "Async", "transportToFrontTimeout" => 60], 'order' => $orderIds];
+            Log::info('createOrder');
+            Log::info(json_encode($body));
+            //dd(json_encode($body));
             $res = $client->request('POST', 'https://api-ru.iiko.services/api/1/deliveries/create', [
                 'body' => json_encode($body),
                 'headers' => [
@@ -196,6 +200,79 @@ class iikoTransport
         }
     }
 
+    public function getOrderById($organizationId, $orderIds){
+        $token = $this->getToken();
+
+        try{
+
+            $client = new Client();
+
+            $body = ['organizationId' => $organizationId, 'orderIds' => $orderIds];
+
+            $res = $client->request('POST', 'https://api-ru.iiko.services/api/1/deliveries/by_id', [
+                'body' => json_encode($body),
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Bearer '.$token
+                ],
+                'http_error' => false
+            ]);
+
+            $statusCode = $res->getStatusCode();
+
+            $data = json_decode($res->getBody());
+
+            return $data;
+
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+
+            $response = $e->getResponse();
+
+            $statusCode = $response->getStatusCode();
+
+            $error = json_decode($response->getBody(), true);
+
+            return ['statusCode' => $statusCode, 'response' => $error];
+        }
+    }
+
+    public function updateStatus($organizationId, $orderId, $status)
+    {
+        $token = $this->getToken();
+
+        try{
+
+            $client = new Client();
+
+            $body = ['organizationId' => $organizationId, 'orderId' => $orderId, 'deliveryStatus' => $status];
+
+            $res = $client->request('POST', 'https://api-ru.iiko.services/api/1/deliveries/update_order_delivery_status', [
+                'body' => json_encode($body),
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Bearer '.$token
+                ],
+                'http_error' => false
+            ]);
+
+            $statusCode = $res->getStatusCode();
+
+            $data = json_decode($res->getBody());
+
+            return $data;
+
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+
+            $response = $e->getResponse();
+
+            $statusCode = $response->getStatusCode();
+
+            $error = json_decode($response->getBody(), true);
+
+            return ['statusCode' => $statusCode, 'response' => $error];
+        }
+    }
+
     public function checkOrder($organizationId, $orderIds)
     {
         $token = $this->getToken();
@@ -204,7 +281,7 @@ class iikoTransport
 
             $client = new Client();
 
-            $body = ['organizationId' => $organizationId,  'createOrderSettings' => ['transportToFrontTimeout' => 300], 'terminalGroupId' => 'fe7f6a9a-a79d-430f-9b7e-818c9061c128', 'order' => $orderIds];
+            $body = ['organizationId' => $organizationId,  'createOrderSettings' => ['transportToFrontTimeout' => 300], 'terminalGroupId' => 'fb2a900f-9011-4e37-8059-2a5152b5b64d', 'order' => $orderIds];
 
             $res = $client->request('POST', 'https://api-ru.iiko.services/api/1/deliveries/check_create', [
                 'body' => json_encode($body),
@@ -457,14 +534,15 @@ class iikoTransport
         }
     }
 
-    public function getAddress(){
+
+    public function getAddress($organizationId, $cityId){
         $token = $this->getToken();
 
         try{
 
             $client = new Client();
 
-            $body = ['organizationIds' => $organizationIds];
+            $body = ['organizationId' => $organizationId, 'cityId' => $cityId];
 
             $res = $client->request('POST', 'https://api-ru.iiko.services/api/1/streets/by_city', [
                 'body' => json_encode($body),
@@ -503,7 +581,7 @@ class iikoTransport
             $client = new Client();
 
             $body = ['organizationIds' => $organizationIds, 'orderLocation' => ['latitude' => $lat, 'longitude' => $long], 'isCourierDelivery' => true];
-
+            // dump(json_encode($body));
             $res = $client->request('POST', 'https://api-ru.iiko.services/api/1/delivery_restrictions/allowed', [
                 'body' => json_encode($body),
                 'headers' => [
@@ -516,6 +594,8 @@ class iikoTransport
             $statusCode = $res->getStatusCode();
 
             $data = json_decode($res->getBody());
+
+            //dump($data);
 
             return $data;
 
@@ -691,6 +771,44 @@ class iikoTransport
             $body = ['organizationIds' => $organizationIds];
 
             $res = $client->request('POST', 'https://api-ru.iiko.services/api/1/delivery_restrictions', [
+                'body' => json_encode($body),
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Bearer '.$token
+                ],
+                'http_error' => false
+            ]);
+
+            $statusCode = $res->getStatusCode();
+
+            $data = json_decode($res->getBody());
+
+            return $data;
+
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+
+            $response = $e->getResponse();
+
+            $statusCode = $response->getStatusCode();
+
+            $error = json_decode($response->getBody(), true);
+
+            return ['statusCode' => $statusCode, 'response' => $error];
+        }
+
+    }
+
+    public function setWebhookTransport($organizationId, $url){
+
+        $token = $this->getToken();
+
+        try{
+
+            $client = new Client();
+
+            $body = ['organizationId' => $organizationId, 'webHooksUri' => $url, 'authToken' => env('IIKO_API_LOGIN', '75782002')];
+
+            $res = $client->request('POST', 'https://api-ru.iiko.services/api/1/webhooks/update_settings', [
                 'body' => json_encode($body),
                 'headers' => [
                     'Content-Type' => 'application/json',
