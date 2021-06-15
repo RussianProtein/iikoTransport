@@ -154,6 +154,46 @@ class iikoTransport
         }
     }
 
+    public function getDiscounts($organizationIds)
+    {
+        $token = $this->getToken();
+
+        try{
+
+            $client = new Client();
+
+            $body = ['organizationIds' => $organizationIds];
+            //dd(json_encode($body));
+            $res = $client->request('POST', 'https://api-ru.iiko.services/api/1/discounts', [
+                'body' => json_encode($body),
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Bearer '.$token
+                ],
+                'http_error' => false
+            ]);
+
+            $statusCode = $res->getStatusCode();
+
+            // dd($res);
+
+            $data = json_decode($res->getBody());
+
+            return $data;
+
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+
+            // dd($e);
+            $response = $e->getResponse();
+
+            $statusCode = $response->getStatusCode();
+
+            $error = json_decode($response->getBody(), true);
+
+            return ['statusCode' => $statusCode, 'response' => $error];
+        }
+    }
+
 
 
     public function createOrder($organizationId, $terminal, $orderIds)
