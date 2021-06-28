@@ -6,6 +6,23 @@ use Log;
 
 class iikoTransport
 {
+    private function TelegramHandler($error)
+    {
+        $chat_ids = [
+            env('TELEGRAM_ID')
+        ];
+
+        foreach ($chat_ids as $chat_id) {
+            $url = sprintf(
+                'https://api.telegram.org/bot'.env('TELEGRAM_KEY').'/sendMessage?chat_id=%s&text=%s',
+                $chat_id,
+                $error
+            );
+
+            file_get_contents($url);
+        }
+    }
+
     public function getToken()
     {
         try{
@@ -34,7 +51,10 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+
+            $this->TelegramHandler($response->getBody());
 
             return response()->json(['statusCode' => $statusCode, 'response' => $error]);
         }
@@ -73,7 +93,10 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -110,7 +133,10 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
+
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -148,7 +174,9 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -188,7 +216,9 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -234,7 +264,9 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -270,7 +302,9 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -307,7 +341,9 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -344,7 +380,9 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -382,7 +420,9 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -419,7 +459,9 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -456,7 +498,9 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -494,7 +538,9 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -531,7 +577,9 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -568,7 +616,9 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -605,7 +655,9 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -645,7 +697,9 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -682,7 +736,9 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -719,7 +775,9 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -757,7 +815,9 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -794,7 +854,9 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -831,7 +893,9 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -869,7 +933,9 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-            $error = json_decode($response->getBody(), true);
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
