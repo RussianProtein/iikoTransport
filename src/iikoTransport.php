@@ -2,19 +2,30 @@
 namespace RussianProtein\iikoTransport;
 
 use GuzzleHttp\Client;
-use Log;
 
 class iikoTransport
 {
+
+    public function __construct()
+    {
+        if(config('iikoTransport.debug'))
+            $this->guzzleClient = app('GuzzleClient')(['base_uri' => 'https://api-ru.iiko.services/']);
+        else
+            $this->guzzleClient = new Client();
+    }
+
     private function TelegramHandler($error)
     {
+        if(!config('iikoTransport.debug'))
+            return;
+
         $chat_ids = [
-            env('TELEGRAM_ID')
+            config('iikoTransport.channels.telegram.chat_id')
         ];
 
         foreach ($chat_ids as $chat_id) {
             $url = sprintf(
-                'https://api.telegram.org/bot'.env('TELEGRAM_KEY').'/sendMessage?chat_id=%s&text=%s',
+                'https://api.telegram.org/bot'.config('iikoTransport.channels.telegram.bot_key').'/sendMessage?chat_id=%s&text=%s',
                 $chat_id,
                 $error
             );
@@ -29,7 +40,7 @@ class iikoTransport
 
             $client = new Client();
 
-            $body = ['apiLogin' => env('IIKO_API_LOGIN', '75782002')];
+            $body = ['apiLogin' => config('iikoTransport.apiLogin')];
 
             $res = $client->request('POST', 'https://api-ru.iiko.services/api/1/access_token', [
                 'body' => json_encode($body),
@@ -237,8 +248,6 @@ class iikoTransport
             $body = ['organizationId' => $organizationId,
             'terminalGroupId' => $terminal,
             'createOrderSettings' => ['transportToFrontTimeout' => 300, "mode" => "Async", "transportToFrontTimeout" => 60], 'order' => $orderIds];
-            Log::info('createOrder');
-            Log::info(json_encode($body));
             //dd(json_encode($body));
             $res = $client->request('POST', 'https://api-ru.iiko.services/api/1/deliveries/create', [
                 'body' => json_encode($body),
