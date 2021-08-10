@@ -38,7 +38,7 @@ class iikoTransport
     {
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['apiLogin' => config('iikoTransport.apiLogin')];
 
@@ -79,7 +79,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationIds' => $organizationIds, 'returnAdditionalInfo' => $returnAdditionalInfo, 'includeDisabled' => $includeDisabled];
 
@@ -119,7 +119,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationId' => $organizationId, 'startRevision' => $startRevision];
 
@@ -160,7 +160,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationIds' => $organizationIds, 'includeDisabled' => false];
 
@@ -199,7 +199,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationIds' => $organizationIds];
             //dd(json_encode($body));
@@ -243,7 +243,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationId' => $organizationId,
             'terminalGroupId' => $terminal,
@@ -286,7 +286,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationId' => $organizationId, 'orderIds' => $orderIds];
 
@@ -325,7 +325,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationId' => $organizationId, 'orderId' => $orderId, 'deliveryStatus' => $status];
 
@@ -364,7 +364,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationId' => $organizationId,  'createOrderSettings' => ['transportToFrontTimeout' => 300], 'terminalGroupId' => 'fb2a900f-9011-4e37-8059-2a5152b5b64d', 'order' => $orderIds];
 
@@ -404,7 +404,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationId' => $organizationId, 'order' => $orderId];
 
@@ -443,7 +443,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationId' => $organizationId, 'terminalGroupId' => 'c880392b-0fe7-4006-a328-3b4a8843fbab', 'createOrderSettings' => ['transportToFrontTimeout' => 100], 'order' => $orderId];
 
@@ -482,7 +482,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationIds' => $organizationIds];
 
@@ -522,7 +522,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationId' => $organizationId, 'orderIds' => $orderIds];
 
@@ -561,7 +561,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationIds' => $organizationIds];
 
@@ -600,7 +600,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationIds' => $organizationIds];
 
@@ -639,7 +639,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationId' => $organizationId, 'cityId' => $cityId];
 
@@ -679,7 +679,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationIds' => $organizationIds, 'orderLocation' => ['latitude' => $lat, 'longitude' => $long], 'isCourierDelivery' => true];
             // dump(json_encode($body));
@@ -720,7 +720,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationIds' => $organizationIds];
 
@@ -759,7 +759,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationIds' => $organizationIds];
 
@@ -799,7 +799,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationIds' => $organizationIds, 'phone' => $phone];
 
@@ -838,7 +838,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationId' => $organizationId, 'orderIds' => [$orderIds]];
 
@@ -877,7 +877,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationIds' => $organizationIds];
 
@@ -917,7 +917,7 @@ class iikoTransport
 
         try{
 
-            $client = new Client();
+            $client = $this->guzzleClient;
 
             $body = ['organizationId' => $organizationId, 'webHooksUri' => $url, 'authToken' => env('IIKO_API_LOGIN', '75782002')];
 

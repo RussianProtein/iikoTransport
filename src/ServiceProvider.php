@@ -31,7 +31,6 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
     {
                 //Логирование всех запросов
                 $this->app->bind('GuzzleClient', function () {
-
                     /**
                      * Если необходимо увидеть полный ответ от запроса, то достаточно заменить:
                      * 'RESPONSE: {code}',
@@ -56,7 +55,7 @@ class ServiceProvider extends \Illuminate\Support\ServiceProvider
                         $stack->unshift(
                             Middleware::log(
                                 with(new Logger('guzzle-log'))->pushHandler(
-                                    new RotatingFileHandler(storage_path('logs/guzzle-log.log'))
+                                    new RotatingFileHandler(storage_path('logs/iiko-log.log'))
                                 ),
                                 new MessageFormatter($messageFormat)
                             )
