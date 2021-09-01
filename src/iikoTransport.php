@@ -6,8 +6,10 @@ use GuzzleHttp\Client;
 class iikoTransport
 {
 
-    public function __construct()
+    public function __construct($iikoLogin = null)
     {
+        $this->iikoLogin = $iikoLogin;
+
         if(config('iikoTransport.debug'))
             $this->guzzleClient = app('GuzzleClient')(['base_uri' => 'https://api-ru.iiko.services/']);
         else
@@ -37,10 +39,9 @@ class iikoTransport
     public function getToken()
     {
         try{
-
             $client = $this->guzzleClient;
 
-            $body = ['apiLogin' => config('iikoTransport.apiLogin')];
+            $body = ['apiLogin' => $this->iikoLogin ? $this->iikoLogin : config('iikoTransport.apiLogin')];
 
             $res = $client->request('POST', 'https://api-ru.iiko.services/api/1/access_token', [
                 'body' => json_encode($body),
@@ -832,6 +833,45 @@ class iikoTransport
         }
     }
 
+    public function getDeliveryByPhoneAndDate($organizationIds, $deliveryDateFrom, $deliveryDateTo, $phone)
+    {
+        $token = $this->getToken();
+
+        try{
+
+            $client = $this->guzzleClient;
+
+            $body = ['organizationIds' => $organizationIds, 'deliveryDateFrom' => $deliveryDateFrom, 'deliveryDateTo' => $deliveryDateTo, 'phone' => $phone];
+
+            $res = $client->request('POST', 'https://api-ru.iiko.services/api/1/deliveries/by_delivery_date_and_phone', [
+                'body' => json_encode($body),
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Bearer '.$token
+                ],
+                'http_error' => false
+            ]);
+
+            $statusCode = $res->getStatusCode();
+
+            $data = json_decode($res->getBody());
+
+            return $data;
+
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+
+            $response = $e->getResponse();
+
+            $statusCode = $response->getStatusCode();
+
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
+
+            return ['statusCode' => $statusCode, 'response' => $error];
+        }
+    }
+
     public function getDeliveryById($organizationId, $orderIds){
 
         $token = $this->getToken();
@@ -919,9 +959,49 @@ class iikoTransport
 
             $client = $this->guzzleClient;
 
-            $body = ['organizationId' => $organizationId, 'webHooksUri' => $url, 'authToken' => env('IIKO_API_LOGIN', '75782002')];
+            $body = ['organizationId' => $organizationId, 'webHooksUri' => $url, 'authToken' => $this->iikoLogin ? $this->iikoLogin : config('iikoTransport.apiLogin')];
 
             $res = $client->request('POST', 'https://api-ru.iiko.services/api/1/webhooks/update_settings', [
+                'body' => json_encode($body),
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Bearer '.$token
+                ],
+                'http_error' => false
+            ]);
+
+            $statusCode = $res->getStatusCode();
+
+            $data = json_decode($res->getBody());
+
+            return $data;
+
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+
+            $response = $e->getResponse();
+
+            $statusCode = $response->getStatusCode();
+
+              $error = json_decode($response->getBody(), true);
+
+            $this->TelegramHandler($response->getBody());
+
+            return ['statusCode' => $statusCode, 'response' => $error];
+        }
+
+    }
+
+    public function getWebhookTransport($organizationId, $url){
+
+        $token = $this->getToken();
+
+        try{
+
+            $client = $this->guzzleClient;
+
+            $body = ['organizationId' => $organizationId];
+
+            $res = $client->request('POST', 'https://api-ru.iiko.services/api/1/webhooks/settings', [
                 'body' => json_encode($body),
                 'headers' => [
                     'Content-Type' => 'application/json',

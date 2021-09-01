@@ -17,8 +17,29 @@ php artisan vendor:publish
 
 Select 
 
-```Provider: RussianProtein\iikoTransport\ServiceProvider"```
+```Provider: RussianProtein\iikoTransport\ServiceProvider```
 
 ## Usage
 
-Soon
+
+Example
+
+```
+<?php
+
+namespace App\Http\Controllers;
+
+use RussianProtein\iikoTransport\iikoTransport;
+
+class Controller extends BaseController
+{
+    public function index()
+    {
+        //Call class iikoTransport (If we do not pass anything to the class, then the default parameter is used from env IIKO_API_LOGIN)
+        $data = new iikoTransport('set iiko login');
+
+        //get Organization List 
+        $organisations = $data->getOrganizations(null, true, true);
+    }
+}
+```
