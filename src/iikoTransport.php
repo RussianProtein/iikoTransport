@@ -1,7 +1,9 @@
 <?php
 namespace RussianProtein\iikoTransport;
 
+use GuzzleHttp\Psr7;
 use GuzzleHttp\Client;
+use App\User;
 
 class iikoTransport
 {
@@ -16,7 +18,7 @@ class iikoTransport
             $this->guzzleClient = new Client();
     }
 
-    private function TelegramHandler($error)
+    private function TelegramHandler($method, $error)
     {
         if(!config('iikoTransport.debug'))
             return;
@@ -25,20 +27,44 @@ class iikoTransport
             config('iikoTransport.channels.telegram.chat_id')
         ];
 
-        foreach ($chat_ids as $chat_id) {
-            $url = sprintf(
-                'https://api.telegram.org/bot'.config('iikoTransport.channels.telegram.bot_key').'/sendMessage?chat_id=%s&text=%s',
-                $chat_id,
-                $error
-            );
+        //typing errors
+        if(stristr($error, "Error converting value")){
+            $enum = "<b>Был передан неверный ID'шник организации.</b>";
+        }elseif(stristr($error, "Timeout exceeded")){
+            $enum = "<b>Данный метод не ответил во время. Что-то с транспортом или терминалом.</b>";
+        }else{
+            $enum = "<b>Неизвестно</b>";
+        }
 
-            file_get_contents($url);
+        //Check if user auth
+        if(isset(auth('api')->user()->id)){
+            $userdata = User::find(auth('api')->user()->id);
+            //info auth user
+            $user = "Телефон пользователя: ".$userdata->phone."\nПлатформа: ".$userdata->os."\n\n";
+        }
+
+        $data = $user."Предполагаемая ошибка: \n".$enum."\n\n<b>Запрос:</b>\n\n".$method."\n\n<b>Ответ:</b>\n\n".$error;
+
+
+        foreach ($chat_ids as $chat_id) {
+            $client = new Client();
+
+            $client->request('POST', 'https://api.telegram.org/bot'.config('iikoTransport.channels.telegram.bot_key').'/sendMessage', [
+                'form_params' => [
+                    'chat_id' => $chat_id,
+                    'text' => urldecode($data),
+                    'parse_mode' => 'HTML'
+                ],
+                'http_error' => false
+            ]);
         }
     }
 
     public function getToken()
     {
         try{
+            $url = "";
+
             $client = $this->guzzleClient;
 
             $body = ['apiLogin' => $this->iikoLogin ? $this->iikoLogin : config('iikoTransport.apiLogin')];
@@ -46,7 +72,7 @@ class iikoTransport
             $res = $client->request('POST', 'https://api-ru.iiko.services/api/1/access_token', [
                 'body' => json_encode($body),
                 'headers' => [
-                    'Content-Type' => 'application/json',
+                    'Content-Type' => 'application/json'
                 ],
                 'http_error' => false
             ]);
@@ -57,16 +83,15 @@ class iikoTransport
 
             return $data->token;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
             $statusCode = $response->getStatusCode();
 
-              $error = json_decode($response->getBody(), true);
+            $error = json_decode($response->getBody(), true);
 
-
-            $this->TelegramHandler($response->getBody());
+            $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return response()->json(['statusCode' => $statusCode, 'response' => $error]);
         }
@@ -99,7 +124,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
@@ -108,7 +133,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+              $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -139,7 +164,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
@@ -147,7 +172,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
 
             return ['statusCode' => $statusCode, 'response' => $error];
@@ -180,7 +205,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
@@ -188,7 +213,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -221,7 +246,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             // dd($e);
             $response = $e->getResponse();
@@ -230,7 +255,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -267,7 +292,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             // dd($e);
             $response = $e->getResponse();
@@ -276,7 +301,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -306,7 +331,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
@@ -314,7 +339,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -345,7 +370,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
@@ -353,7 +378,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -384,7 +409,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
@@ -392,7 +417,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -432,7 +457,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -463,7 +488,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
@@ -471,7 +496,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -502,7 +527,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
@@ -510,7 +535,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -542,7 +567,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
@@ -550,7 +575,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -581,7 +606,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
@@ -589,7 +614,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -620,7 +645,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
@@ -628,7 +653,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -659,7 +684,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
@@ -667,7 +692,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -701,7 +726,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
@@ -709,7 +734,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -740,7 +765,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
@@ -748,7 +773,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -779,7 +804,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
@@ -787,7 +812,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -819,7 +844,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
@@ -827,7 +852,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -858,7 +883,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
@@ -866,7 +891,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -897,7 +922,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
@@ -905,7 +930,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -936,7 +961,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
@@ -944,7 +969,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -976,7 +1001,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
@@ -984,7 +1009,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
@@ -1016,7 +1041,7 @@ class iikoTransport
 
             return $data;
 
-        } catch (\GuzzleHttp\Exception\ClientException $e) {
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
 
             $response = $e->getResponse();
 
@@ -1024,7 +1049,7 @@ class iikoTransport
 
               $error = json_decode($response->getBody(), true);
 
-            $this->TelegramHandler($response->getBody());
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
