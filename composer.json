@@ -3,7 +3,7 @@
     "description": "iikoTransport API Library for PHP",
     "type": "library",
     "require": {
-        "guzzlehttp/guzzle": "^6.3"
+        "guzzlehttp/guzzle": "*"
     },
     "license": "MIT",
     "authors": [

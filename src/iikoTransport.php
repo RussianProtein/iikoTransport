@@ -43,7 +43,7 @@ class iikoTransport
             $user = "Телефон пользователя: ".$userdata->phone."\nПлатформа: ".$userdata->os."\n\n";
         }
 
-        $data = $user."Предполагаемая ошибка: \n".$enum."\n\n<b>Запрос:</b>\n\n".$method."\n\n<b>Ответ:</b>\n\n".$error;
+        $data = @$user."Предполагаемая ошибка: \n".$enum."\n\n<b>Запрос:</b>\n\n".$method."\n\n<b>Ответ:</b>\n\n".$error;
 
 
         foreach ($chat_ids as $chat_id) {
@@ -273,7 +273,7 @@ class iikoTransport
 
             $body = ['organizationId' => $organizationId,
             'terminalGroupId' => $terminal,
-            'createOrderSettings' => ['transportToFrontTimeout' => 300, "mode" => "Async", "transportToFrontTimeout" => 60], 'order' => $orderIds];
+            'createOrderSettings' => ['transportToFrontTimeout' => 300, "mode" => "Async", "transportToFrontTimeout" => 120], 'order' => $orderIds];
             //dd(json_encode($body));
             $res = $client->request('POST', 'https://api-ru.iiko.services/api/1/deliveries/create', [
                 'body' => json_encode($body),
@@ -471,7 +471,7 @@ class iikoTransport
 
             $client = $this->guzzleClient;
 
-            $body = ['organizationId' => $organizationId, 'terminalGroupId' => 'c880392b-0fe7-4006-a328-3b4a8843fbab', 'createOrderSettings' => ['transportToFrontTimeout' => 100], 'order' => $orderId];
+            $body = ['organizationId' => $organizationId, 'terminalGroupId' => 'c880392b-0fe7-4006-a328-3b4a8843fbab', 'createOrderSettings' => ['transportToFrontTimeout' => 120], 'order' => $orderId];
 
             $res = $client->request('POST', 'https://api-ru.iiko.services/api/1/deliveries/drafts/commit', [
                 'body' => json_encode($body),
