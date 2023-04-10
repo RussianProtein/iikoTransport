@@ -219,6 +219,46 @@ class iikoTransport
         }
     }
 
+
+    public function getTerminalIsAlive($organizationIds, $terminalGroupIds)
+    {
+        $token = $this->getToken();
+
+        try{
+
+            $client = $this->guzzleClient;
+
+            $body = ['organizationIds' => $organizationIds, 'terminalGroupIds' => $terminalGroupIds];
+
+            $res = $client->request('POST', 'https://api-ru.iiko.services/api/1/terminal_groups/is_alive', [
+                'body' => json_encode($body),
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Bearer '.$token
+                ],
+                'http_error' => false
+            ]);
+
+            $statusCode = $res->getStatusCode();
+
+            $data = json_decode($res->getBody());
+
+            return $data;
+
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+
+            $response = $e->getResponse();
+
+            $statusCode = $response->getStatusCode();
+
+              $error = json_decode($response->getBody(), true);
+
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
+
+            return ['statusCode' => $statusCode, 'response' => $error];
+        }
+    }
+
     public function getDiscounts($organizationIds)
     {
         $token = $this->getToken();
