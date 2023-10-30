@@ -1096,4 +1096,45 @@ class iikoTransport
 
     }
 
+    public function getCombosInfo($organizationId){
+
+        $token = $this->getToken();
+
+        try{
+
+            $client = $this->guzzleClient;
+
+            $body = [
+                'extraData' => true,
+                'organizationId' => $organizationId
+            ];
+
+            $res = $client->request('POST', 'https://api-ru.iiko.services/api/1/combo', [
+                'body' => json_encode($body),
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Bearer '.$token
+                ],
+                'http_error' => false
+            ]);
+
+            $data = json_decode($res->getBody());
+
+            return $data;
+
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+
+            $response = $e->getResponse();
+
+            $statusCode = $response->getStatusCode();
+
+              $error = json_decode($response->getBody(), true);
+
+             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
+
+            return ['statusCode' => $statusCode, 'response' => $error];
+        }
+
+    }
+
 }
