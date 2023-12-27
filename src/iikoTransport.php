@@ -811,9 +811,9 @@ class iikoTransport
 
             $statusCode = $response->getStatusCode();
 
-              $error = json_decode($response->getBody(), true);
+            $error = json_decode($response->getBody(), true);
 
-             $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), Psr7\Message::toString($e->getResponse()));
+            $this->TelegramHandler(Psr7\Message::toString($e->getRequest()), substr(Psr7\Message::toString($e->getResponse()), 0, 3000));
 
             return ['statusCode' => $statusCode, 'response' => $error];
         }
