@@ -20,6 +20,10 @@ class iikoTransport
 
     private function TelegramHandler($method, $error)
     {
+
+        $method = substr($method, 0, 500);
+        $error  = substr($error, 0, 500);
+
         if(!config('iikoTransport.debug'))
             return;
 
