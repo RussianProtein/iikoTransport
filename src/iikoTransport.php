@@ -3,7 +3,7 @@ namespace RussianProtein\iikoTransport;
 
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Client;
-use App\User;
+use App\Models\User;
 
 class iikoTransport
 {
