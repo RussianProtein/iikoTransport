@@ -1,4 +1,5 @@
 <?php
+
 namespace RussianProtein\iikoTransport;
 
 use GuzzleHttp\Psr7;
