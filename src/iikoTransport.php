@@ -1100,7 +1100,7 @@ class iikoTransport
 
     }
 
-    public function getCombosInfo($organizationId){
+    public function getCombosInfo($organizationId, $extraData = false){
 
         $token = $this->getToken();
 
@@ -1109,7 +1109,7 @@ class iikoTransport
             $client = $this->guzzleClient;
 
             $body = [
-                'extraData' => true,
+                'extraData' => $extraData,
                 'organizationId' => $organizationId
             ];
 
