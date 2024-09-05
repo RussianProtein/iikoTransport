@@ -799,7 +799,8 @@ class iikoTransport
                 'body' => json_encode($body),
                 'headers' => [
                     'Content-Type' => 'application/json',
-                    'Authorization' => 'Bearer '.$token
+                    'Authorization' => 'Bearer '.$token,
+                    'Timeout' => 50,
                 ],
                 'http_error' => false
             ]);
